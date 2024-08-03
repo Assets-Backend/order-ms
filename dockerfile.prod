@@ -1,0 +1,30 @@
+# Dependencias
+FROM node:21-alpine3.19 as deps
+WORKDIR /usr/src/app
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm install
+
+# Builder
+FROM node:21-alpine3.19 as build
+WORKDIR /usr/src/app
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+# Este comando es para eliminar las dependencias de desarrollo
+RUN npm ci -f --only=production && npm cache clean --force 
+
+# Crear la imagen de docker
+FROM node:21-alpine3.19 as prod
+WORKDIR /usr/src/app
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
+ENV NODE_ENV=production
+
+# Cambiar permisos de la carpeta antes de cambiar de usuario
+RUN chown -R node:node /usr/src/app
+
+# Crear un usuario no root para ejecutar la aplicación. Esto es una buena práctica de seguridad para evitar que la aplicación se ejecute como root. 
+USER node
+
+CMD ["node", "dist/main.js"]
