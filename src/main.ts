@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { envs } from './config';
+import { MetadataInterceptor } from './common/interceptors/metadata.interceptor';
 
 async function bootstrap() {
 
@@ -17,6 +18,8 @@ async function bootstrap() {
             }
         }
     );
+
+    app.useGlobalInterceptors(new MetadataInterceptor());
 
     app.useGlobalPipes(
         new ValidationPipe({

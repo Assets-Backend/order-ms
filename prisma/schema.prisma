@@ -24,18 +24,18 @@ model claim {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model order {
-  order_id       Int            @id @default(autoincrement())
-  client_fk      Int
-  patient_fk     Int
-  treatment_fk   Int
-  frequency      Int            @db.SmallInt
-  total_sessions Int            @db.SmallInt
-  diagnosis      String?
-  updated_by     Int
-  deleted_at     DateTime?      @db.Timestamp(6)
-  created_at     DateTime       @default(now()) @db.Timestamp(6)
-  updated_at     DateTime       @default(now()) @db.Timestamp(6)
-  order_detail   order_detail[]
+  order_id     Int            @id @default(autoincrement())
+  client_fk    Int
+  patient_fk   Int
+  company_fk   Int
+  treatment_fk Int
+  frequency    Int            @db.SmallInt
+  diagnosis    String?
+  updated_by   Int
+  deleted_at   DateTime?      @db.Timestamp(6)
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at   DateTime       @default(now()) @db.Timestamp(6)
+  order_detail order_detail[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -46,6 +46,7 @@ model order_detail {
   professional_fk Int?
   start_date      DateTime  @db.Timestamp(6)
   finish_date     DateTime  @db.Timestamp(6)
+  total_sessions  Int       @db.SmallInt
   sessions        Int       @db.SmallInt
   coinsurance     Decimal   @default(0) @db.Decimal(7, 2)
   value           Decimal   @db.Decimal(7, 2)
