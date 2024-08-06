@@ -1,14 +1,17 @@
-import { IsInt, IsNumber, IsOptional, IsPositive, IsString, Matches, Max, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsInt, IsNumber, IsOptional, IsPositive, IsString, Matches, Max, Min } from 'class-validator';
 
 export class CreateOrderDetailDto {
 
     client_fk: number;
 
+    @IsOptional()
     @IsInt()
     @IsPositive()
     @Max(2147483647)
     updated_by: number;
 
+    @IsOptional()
     @IsInt()
     @IsPositive()
     @Max(2147483647)
@@ -20,45 +23,48 @@ export class CreateOrderDetailDto {
     @Max(2147483647)
     professional_fk?: number;
 
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'La fecha debe estar en el formato "YYYY-MM-DD"' })
+    @IsDate()
+    @Type(() => Date)
     start_date: Date;
     
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'La fecha debe estar en el formato "YYYY-MM-DD"' })
+    @IsDate()
+    @Type(() => Date)
     finish_date: Date;
     
     @IsOptional()
     @IsInt()
-    @IsPositive()
+    @Min(0)
     @Max(31)
     total_sessions: number = 0;
 
     @IsOptional()
     @IsInt()
-    @IsPositive()
+    @Min(0)
     sessions: number = 0;
 
     @IsOptional()
-    @IsOptional()
     @IsNumber()
-    @IsPositive()
+    @Min(0)
     coinsurance: number = 0
     
     @IsOptional()
     @IsNumber()
-    @IsPositive()
+    @Min(0)
     value: number = 0
     
     @IsOptional()
     @IsNumber()
-    @IsPositive()
+    @Min(0)
     cost: number = 0
     
     @IsOptional()
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'La fecha debe estar en el formato "YYYY-MM-DD"' })
+    @IsDate()
+    @Type(() => Date)
     started_at?: Date
     
     @IsOptional()
-    @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'La fecha debe estar en el formato "YYYY-MM-DD"' })
+    @IsDate()
+    @Type(() => Date)
     finished_at?: Date
 
     @IsOptional()
