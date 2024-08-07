@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsInt, IsNumber, IsOptional, IsPositive, IsString, Matches, Max, Min } from 'class-validator';
+import { IsDate, IsInt, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
 
 export class CreateOrderDetailDto {
 
@@ -35,27 +35,27 @@ export class CreateOrderDetailDto {
     @IsInt()
     @Min(0)
     @Max(31)
-    total_sessions: number = 0;
+    total_sessions: number;
 
     @IsOptional()
     @IsInt()
     @Min(0)
-    sessions: number = 0;
+    sessions: number;
 
     @IsOptional()
     @IsNumber()
     @Min(0)
-    coinsurance: number = 0
+    coinsurance: number
     
     @IsOptional()
     @IsNumber()
     @Min(0)
-    value: number = 0
+    value: number
     
     @IsOptional()
     @IsNumber()
     @Min(0)
-    cost: number = 0
+    cost: number
     
     @IsOptional()
     @IsDate()

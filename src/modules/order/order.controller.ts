@@ -1,10 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrderService } from './order.service';
-import { CreateOrderDetailDto, CreateOrderDto, UpdateOrderDto } from './dto';
+import { CreateOrderDto, UpdateOrderDto } from './dto';
 import { CurrentClient } from 'src/common/decorators/current-client.decorator';
 import { ClientIds } from 'src/common/interface/client-ids.interface';
-import { order, order_detail } from '@prisma/client';
+import { order } from '@prisma/client';
+import { PaginationDto } from 'src/common/dto';
 
 @Controller()
 export class OrderController {
@@ -17,99 +18,57 @@ export class OrderController {
         @Payload('createOrderDto') createOrderDto: CreateOrderDto,
     ): Promise<order> {
 
-        const { updated_by, order_detail, ...order }: any = createOrderDto
+        const { updated_by, ...order }: any = createOrderDto
 
         return this.orderService.createNewOrder(currentClient, {
             updated_by,
             orderCreateInput: order,
-            orderDetailCreateInput: order_detail
         })
     }
 
-    @MessagePattern('order.create.orderDetail')
-    createDetail(
+    @MessagePattern('order.find.orders')
+    findAll(
         @CurrentClient() currentClient: ClientIds,
-        @Payload('createOrderDetailDto') createOrderDetailDto: CreateOrderDetailDto,
-    ): Promise<order_detail> {
+        @Payload('whereInput') whereInput: any,
+        @Payload('paginationDto') paginationDto: PaginationDto
+    ): Promise<order[]> {
 
-        const { updated_by, order_fk, ...order_detail }: any = createOrderDetailDto
+        const { limit: take, offset: skip } = paginationDto
+        whereInput ? whereInput.deleted_at = null : whereInput = { deleted_at: null }
 
-        return this.orderService.createOrderDetail(currentClient, {
-            order_fk,
+        return this.orderService.findAll(currentClient, {
+            orderWhereInput: whereInput,
+            skip,
+            take
+        })
+    }
+
+    @MessagePattern('order.update.order')
+    update(
+        @CurrentClient() currentClient: ClientIds,
+        @Payload('updateOrderDto') updateOrderDto: UpdateOrderDto
+    ): Promise<order> {
+
+        const { order_id, updated_by, ...order } = updateOrderDto
+
+        return this.orderService.update(currentClient, {
+            whereUniqueInput: { order_id },
             updated_by,
-            orderDetailCreateInput: order_detail
+            orderUpdateInput: order,
         })
     }
 
-    @MessagePattern('order.find.order')
-    findOne(
+    @MessagePattern('order.delete.order')
+    delete(
         @CurrentClient() currentClient: ClientIds,
-        @Payload('detail_id') detail_id: number
-    ): Promise<order_detail> {
+        @Payload('deleteOrderDto') deleteOrderDto: { order_id: order['order_id'], updated_by: order['client_fk'] }
+    ): Promise<order> {
 
-        return this.orderService.findOneByUnique(currentClient, {
-            whereUniqueInput: { detail_id }
-        });
-    }
-
-    // @MessagePattern('coordinator.findByCompany.patient')
-    // findByCompany(
-    //     @CurrentClient() currentClient: ClientIds,
-    //     @Payload('company_fk') company_fk: number,
-    //     @Payload('paginationDto') paginationDto: PaginationDto
-    // ): Promise<patient[]> {
-
-    //     const { limit: take, offset: skip } = paginationDto
-
-    //     return this.patientService.findByCompany(currentClient, {
-    //         patientWhereInput: { company_fk },
-    //         skip,
-    //         take
-    //     });
-    // }
-
-    // @MessagePattern('coordinator.find.patients')
-    // findAll(
-    //     @CurrentClient() currentClient: ClientIds,
-    //     @Payload('paginationDto') paginationDto: PaginationDto
-    // ): Promise<patient[]> {
-
-    //     const { limit: take, offset: skip } = paginationDto
-
-    //     return this.patientService.findAll(currentClient, {
-    //         patientWhereInput: { deleted_at: null },
-    //         skip,
-    //         take
-    //     })
-    // }
-
-    // @MessagePattern('coordinator.update.patient')
-    // update(
-    //     @CurrentClient() currentClient: ClientIds,
-    //     @Payload('updatePatientDto') updatePatientDto: UpdatePatientDto
-    // ): Promise<patient> {
-
-    //     const { patient_id, updated_by: client_id, ...data } = updatePatientDto
-
-    //     return this.patientService.update(currentClient, {
-    //         whereUniqueInput: { patient_id },
-    //         client_updated_by: { client_id  },
-    //         data,
-    //     })
-    // }
-
-    // @MessagePattern('coordinator.delete.patient')
-    // delete(
-    //     @CurrentClient() currentClient: ClientIds,
-    //     @Payload('deletePatientDto') deletePatientDto: { patient_id: patient['patient_id'], updated_by: client['client_id'] }
-    // ): Promise<patient> {
-
-    //     const { patient_id, updated_by: client_id } = deletePatientDto
+        const { order_id, updated_by } = deleteOrderDto
         
-    //     return this.patientService.delete(currentClient, {
-    //         whereUniqueInput: { patient_id },
-    //         client_updated_by: { client_id }
-    //     })
-    // }
-
+        return this.orderService.delete(currentClient, {
+            orderWhereUniqueInput: { order_id },
+            updated_by
+        })
+    }
 }

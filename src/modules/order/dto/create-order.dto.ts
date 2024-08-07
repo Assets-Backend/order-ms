@@ -1,6 +1,4 @@
-import { Type } from "class-transformer";
 import { IsInt, IsOptional, IsPositive, IsString, Max, Min, ValidateNested } from "class-validator";
-import { CreateOrderDetailDto } from "./create-order-detail.dto";
 
 export class CreateOrderDto {
 
@@ -35,8 +33,8 @@ export class CreateOrderDto {
     @IsString()
     diagnosis?: string;
 
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => CreateOrderDetailDto)
-    order_detail?: CreateOrderDetailDto
+    // @IsOptional()
+    // @ValidateNested()
+    // @Type(() => CreateOrderDetailDto)
+    // order_detail?: CreateOrderDetailDto
 }
