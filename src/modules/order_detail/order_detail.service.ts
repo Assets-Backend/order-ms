@@ -37,9 +37,9 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
 
         try {
 
-            // Compruebo que exista la orden
-            const { frequency, company_fk, treatment_fk } = await this.order.findUnique({ 
-                where: { order_id }, 
+            // Compruebo que exista la orden y que perteza al cliente
+            const { frequency, company_fk, treatment_fk } = await this.order.findUniqueOrThrow({ 
+                where: { order_id, client_fk: currentClient.client_id }, 
                 select: { 
                     frequency: true, 
                     company_fk: true,
@@ -235,7 +235,7 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
             });
 
             return await this.order_detail.update({
-                where: { detail_id: detail_id },
+                where: { detail_id },
                 data: { 
                     finished_at: new Date(), 
                     updated_by: updated_by

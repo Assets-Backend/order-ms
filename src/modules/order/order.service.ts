@@ -144,10 +144,10 @@ export class OrderService extends PrismaClient implements OnModuleInit {
             });
 
             return await this.order.update({
-                where: { order_id: order_id },
+                where: { order_id },
                 data: { 
                     deleted_at: new Date(), 
-                    updated_by: updated_by
+                    updated_by
                 }
             }) 
 

@@ -46,11 +46,11 @@ model order_detail {
   professional_fk Int?
   start_date      DateTime  @db.Timestamp(6)
   finish_date     DateTime  @db.Timestamp(6)
-  total_sessions  Int       @db.SmallInt
-  sessions        Int       @db.SmallInt
+  total_sessions  Int       @default(0) @db.SmallInt
+  sessions        Int       @default(0) @db.SmallInt
   coinsurance     Decimal   @default(0) @db.Decimal(7, 2)
-  value           Decimal   @db.Decimal(7, 2)
-  cost            Decimal   @db.Decimal(7, 2)
+  value           Decimal   @default(0) @db.Decimal(7, 2)
+  cost            Decimal   @default(0) @db.Decimal(7, 2)
   started_at      DateTime? @db.Date
   finished_at     DateTime? @db.Date
   requirements    String?   @db.VarChar(300)
