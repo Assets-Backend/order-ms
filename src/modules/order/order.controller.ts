@@ -26,6 +26,17 @@ export class OrderController {
         })
     }
 
+    @MessagePattern('order.find.order')
+    findOne(
+        @CurrentClient() currentClient: ClientIds,
+        @Payload('order_id') order_id: number
+    ): Promise<order> {
+
+        return this.orderService.findOneByUnique({
+            whereUniqueInput: { order_id }
+        }, currentClient);
+    }
+
     @MessagePattern('order.find.orders')
     findAll(
         @CurrentClient() currentClient: ClientIds,

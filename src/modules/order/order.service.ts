@@ -71,6 +71,26 @@ export class OrderService extends PrismaClient implements OnModuleInit {
         });
     }
 
+    async findOneByUnique(params: {
+        whereUniqueInput: Prisma.orderWhereUniqueInput,
+        select?: Prisma.orderSelect
+    }, currentClient?: ClientIds): Promise<order> {
+
+        const {whereUniqueInput: where, select} = params
+
+        if (currentClient) where.client_fk = currentClient.client_id
+
+        try {
+
+            return await this.order.findUniqueOrThrow({ where, select })
+        } catch (error) {
+            throw new RpcException({
+                status: 400,
+                message: error.message
+            });
+        }
+    }
+
     async findAll(currentClient: ClientIds, params?: {
         orderWhereInput: Prisma.orderWhereInput,
         select?: Prisma.orderSelect,

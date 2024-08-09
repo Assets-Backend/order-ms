@@ -7,8 +7,8 @@ export const CurrentClient = createParamDecorator(
         const ctx = context.switchToRpc();
         const currentClient: ClientIds = ctx.getContext().metadata; // Obtén los datos del mensaje
 
-        if (!currentClient)
-            throw new InternalServerErrorException('Client not found in request object');
+        if (!currentClient) return undefined;
+            // throw new InternalServerErrorException('Client not found in request object');
 
         return data ? currentClient[data] : currentClient;
     }
