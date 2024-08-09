@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateOrderDto, UpdateOrderDto } from './dto';
-import { order, order_detail, Prisma, PrismaClient } from '@prisma/client';
+import { order, Prisma, PrismaClient } from '@prisma/client';
 import { ClientIds } from 'src/common/interface/client-ids.interface';
 import { NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrderService extends PrismaClient implements OnModuleInit {
@@ -143,13 +143,24 @@ export class OrderService extends PrismaClient implements OnModuleInit {
                 message: 'La orden ya ha sido eliminado'
             });
 
-            return await this.order.update({
+            const deleteOrder = await this.order.update({
                 where: { order_id },
                 data: { 
                     deleted_at: new Date(), 
                     updated_by
                 }
             }) 
+
+            // Finalizo los detalles de la orden
+            await this.order_detail.updateMany({
+                where: { order_fk: order_id },
+                data: {
+                    finished_at: new Date(),
+                    updated_by
+                }
+            })
+
+            return deleteOrder
 
         } catch (error) {
             throw new RpcException({

@@ -1,8 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { IsInt, IsPositive, Max } from 'class-validator';
-import { CreateOrderDetailDto } from './create-order-detail.dto';
+import { CreateDetailDto } from './create-detail.dto';
 
-export class UpdateOrderDetailDto extends PartialType(CreateOrderDetailDto) {
+export class UpdateDetailDto extends PartialType(CreateDetailDto) {
   
     @IsInt()
     @IsPositive()

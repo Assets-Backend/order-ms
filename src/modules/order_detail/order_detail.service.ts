@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CreateOrderDetailDto, UpdateOrderDetailDto } from './dto';
+import { CreateDetailDto, UpdateDetailDto } from './dto';
 import { order, order_detail, Prisma, PrismaClient } from '@prisma/client';
 import { NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -241,6 +241,40 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
                     updated_by: updated_by
                 }
             }) 
+
+        } catch (error) {
+            throw new RpcException({
+                status: 400,
+                message: error.message
+            });
+        }
+    }
+
+    async accept(params: {
+        professional_fk: order_detail['professional_fk'],
+        detail_id: order_detail['detail_id'],
+    }): Promise<order_detail> {
+
+        const { professional_fk, detail_id } = params
+        
+        try {
+
+            // Verifico que exista el detalle de la orden y que no haya sido finalizado
+            const { client_fk } = await this.order_detail.findUniqueOrThrow({ 
+                where: { detail_id, finished_at: null } 
+            })
+
+            // Verifico que el profesional tenga una relacion activa con el coordinador
+            await firstValueFrom( 
+                this.client.send('community.find.professional', { 
+                    relation: { client_fk, professional_fk} 
+                })
+            );
+
+            return await this.order_detail.update({
+                where: { detail_id },
+                data: { professional_fk }
+            })
 
         } catch (error) {
             throw new RpcException({

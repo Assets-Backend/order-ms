@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsDate, IsInt, IsNumber, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
 
-export class CreateOrderDetailDto {
+export class CreateDetailDto {
 
     client_fk: number;
 
