@@ -99,4 +99,49 @@ export class OrderDetailController {
     ): Promise<number> {
         return this.orderDetailService.countByCompany({ company_id })
     }
+
+    @MessagePattern('order.getDetails.detail')
+    getProfessionalDetails(
+        @Payload('detail_id') detail_id: number,
+        @Payload('professional_id') professional_fk: number,
+        @Payload('paginationDto') paginationDto: PaginationDto
+    ): Promise<order_detail[]> {
+
+        const { limit: take, offset: skip } = paginationDto
+
+        return this.orderDetailService.getProfessionalDetails({
+            whereInput: { detail_id, professional_fk, finished_at: null },
+            skip,
+            take
+        })
+    }
+
+    @MessagePattern('order.getDetail.detail')
+    getProfessionalDetail(
+        @Payload('detail_id') detail_id: number,
+        @Payload('professional_id') professional_fk: number,
+    ): Promise<order_detail[]> {
+
+        return this.orderDetailService.getProfessionalDetails({
+            whereInput: { detail_id, professional_fk, finished_at: null },
+        })
+    }
+
+    @MessagePattern('order.findPending.details')
+    findPendingOrders(
+        @Payload('client_fk') client_fk: number,
+        @Payload('professional_id') professional_fk: number,
+        @Payload('paginationDto') paginationDto: PaginationDto
+    ): Promise<order_detail[]> {
+
+        const { limit: take, offset: skip } = paginationDto
+
+        return this.orderDetailService.findPendingOrders({
+            client_fk,
+            professional_fk,
+            skip,
+            take
+        })
+    }
+
 }

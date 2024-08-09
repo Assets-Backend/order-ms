@@ -25,7 +25,7 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
     async create(currentClient: ClientIds, params: {
         order_fk: order_detail['order_fk'],
         updated_by: order_detail['updated_by'],
-        orderDetailCreateInput?: Prisma.order_detailCreateInput
+        orderDetailCreateInput: Prisma.order_detailCreateInput
     }): Promise<order_detail> {
 
         const { order_fk: order_id, updated_by, orderDetailCreateInput: data } = params
@@ -63,7 +63,7 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
             );
 
             // si cost es 0, obtenerlo de coordinator-ms
-            if (!cost) data.cost = await firstValueFrom( 
+            if (!cost && professional_fk) data.cost = await firstValueFrom( 
                 this.client.send('coordinator.getValue.treatmentHasProfessional', {
                     currentClient, compositeIdDto: { company_fk, treatment_fk, professional_fk }
                 }).pipe( map(response => Number(response.value)) )
@@ -261,7 +261,7 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
 
             // Verifico que exista el detalle de la orden y que no haya sido finalizado
             const { client_fk } = await this.order_detail.findUniqueOrThrow({ 
-                where: { detail_id, finished_at: null } 
+                where: { detail_id, professional_fk: null, finished_at: null } 
             })
 
             // Verifico que el profesional tenga una relacion activa con el coordinador
@@ -299,6 +299,75 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
                 }
             });
 
+        } catch (error) {
+            throw new RpcException({
+                status: 400,
+                message: error.message
+            });
+        }
+    }
+
+    async getProfessionalDetails(params: {
+        whereInput: Prisma.order_detailWhereInput,
+        select?: Prisma.order_detailSelect,
+        skip?: Prisma.order_detailFindManyArgs['skip'],
+        take?: Prisma.order_detailFindManyArgs['take'],
+    }): Promise<order_detail[]> {
+
+        const { whereInput: where, select, skip, take } = params
+
+        try {
+            return await this.order_detail.findMany({ where, select, skip, take })
+        } catch (error) {
+            throw new RpcException({
+                status: 400,
+                message: error.message
+            });
+        }
+    }
+
+    async getProfessionalDetail(params: {
+        whereUniqueInput: Prisma.order_detailWhereUniqueInput,
+        select?: Prisma.order_detailSelect,
+    }): Promise<order_detail> {
+
+        const { whereUniqueInput: where, select } = params
+
+        try {
+            return await this.order_detail.findUniqueOrThrow({ where, select })
+        } catch (error) {
+            throw new RpcException({
+                status: 400,
+                message: error.message
+            });
+        }
+    }
+
+    async findPendingOrders(params: {
+        professional_fk: order_detail['professional_fk'],
+        client_fk: order_detail['client_fk'],
+        select?: Prisma.order_detailSelect,
+        skip?: Prisma.order_detailFindManyArgs['skip'],
+        take?: Prisma.order_detailFindManyArgs['take'],
+    }): Promise<order_detail[]> {
+
+        const { professional_fk, client_fk, select, skip, take } = params
+
+        try {
+
+            // Verifico que la relacion entre el cliente y el profesional exista
+            await firstValueFrom( 
+                this.client.send('community.find.professional', { 
+                    relation: { client_fk, professional_fk} 
+                })
+            );
+
+            return await this.order_detail.findMany({ 
+                where: { client_fk, professional_fk: null, finished_at: null }, 
+                select, 
+                skip, 
+                take 
+            })
         } catch (error) {
             throw new RpcException({
                 status: 400,
