@@ -102,7 +102,6 @@ export class OrderDetailController {
 
     @MessagePattern('order.getDetails.detail')
     getProfessionalDetails(
-        @Payload('detail_id') detail_id: number,
         @Payload('professional_id') professional_fk: number,
         @Payload('paginationDto') paginationDto: PaginationDto
     ): Promise<order_detail[]> {
@@ -110,7 +109,7 @@ export class OrderDetailController {
         const { limit: take, offset: skip } = paginationDto
 
         return this.orderDetailService.getProfessionalDetails({
-            whereInput: { detail_id, professional_fk, finished_at: null },
+            whereInput: { professional_fk, finished_at: null },
             skip,
             take
         })
