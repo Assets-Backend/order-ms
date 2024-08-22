@@ -119,10 +119,10 @@ export class OrderDetailController {
     getProfessionalDetail(
         @Payload('detail_id') detail_id: number,
         @Payload('professional_id') professional_fk: number,
-    ): Promise<order_detail[]> {
+    ): Promise<order_detail> {
 
-        return this.orderDetailService.getProfessionalDetails({
-            whereInput: { detail_id, professional_fk, finished_at: null },
+        return this.orderDetailService.getProfessionalDetail({
+            whereUniqueInput: { detail_id, professional_fk, finished_at: null }
         })
     }
 
