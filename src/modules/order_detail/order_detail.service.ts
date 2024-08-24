@@ -388,11 +388,11 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
             return await this.order_detail.update({ where, select, data: {
                 sessions: { increment: 1 }
             } })
-            
+
         } catch (error) {
             throw new RpcException({
                 status: 400,
-                message: error.message
+                message: "Error al agregar una sesión"
             });
         }
     }
