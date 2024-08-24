@@ -142,5 +142,16 @@ export class OrderDetailController {
             take
         })
     }
+    
+    @MessagePattern('order.addSession.detail')
+    addSession(
+        @Payload('detail_id') detail_id: number,
+        @Payload('professional_id') professional_fk: number,
+    ): Promise<order_detail> {
+
+        return this.orderDetailService.addSessionDetail({
+            whereUniqueInput: { detail_id, professional_fk, finished_at: null }
+        })
+    }
 
 }

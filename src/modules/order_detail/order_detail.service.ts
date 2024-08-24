@@ -375,4 +375,25 @@ export class OrderDetailService extends PrismaClient implements OnModuleInit {
             });
         }
     }
+
+    async addSessionDetail(params: {
+        whereUniqueInput: Prisma.order_detailWhereUniqueInput,
+        select?: Prisma.order_detailSelect,
+    }): Promise<order_detail> {
+
+        const { whereUniqueInput: where, select } = params
+
+        try {
+
+            return await this.order_detail.update({ where, select, data: {
+                sessions: { increment: 1 }
+            } })
+            
+        } catch (error) {
+            throw new RpcException({
+                status: 400,
+                message: error.message
+            });
+        }
+    }
 }
